@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sys-info-app-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: sys-info-app
+  ports:
+    - port: 80
+      targetPort: 5000

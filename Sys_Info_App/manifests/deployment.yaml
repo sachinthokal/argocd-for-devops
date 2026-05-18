@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sys-info-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sys-info-app
+  template:
+    metadata:
+      labels:
+        app: sys-info-app
+    spec:
+      containers:
+      - name: sys-info-app
+        image: sachinthokal/sys_info_app:v1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
