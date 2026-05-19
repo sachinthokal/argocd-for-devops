@@ -3,9 +3,10 @@ kind: Service
 metadata:
   name: sys-info-app-service
 spec:
-  type: LoadBalancer
+  type: NodePort
   selector:
     app: sys-info-app
   ports:
     - port: 80
       targetPort: 5000
+      nodePort: 30081
