@@ -3,6 +3,8 @@ controller:
   hostPort:
     enabled: true
   terminationGracePeriodSeconds: 0
+  publishService:
+    enabled: false
   service:
     type: NodePort
   nodeSelector:

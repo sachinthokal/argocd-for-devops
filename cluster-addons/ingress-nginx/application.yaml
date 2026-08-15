@@ -5,29 +5,18 @@ metadata:
   namespace: argocd
 spec:
   project: default
-  source:
-    repoURL: 'https://kubernetes.github.io/ingress-nginx'
-    chart: ingress-nginx
-    targetRevision: 4.10.1
-    helm:
-      values: |
-        controller:
-          hostPort:
-            enabled: true
-          terminationGracePeriodSeconds: 0
-          service:
-            type: NodePort
-          nodeSelector:
-            ingress-ready: "true"
-          tolerations:
-            - key: "node-role.kubernetes.io/control-plane"
-              operator: "Equal"
-              effect: "NoSchedule"
-            - key: "node-role.kubernetes.io/master"
-              operator: "Equal"
-              effect: "NoSchedule"
-          extraArgs:
-            publish-status-address: "localhost"
+  sources:
+    # 1. Official Helm Chart
+    - repoURL: 'https://kubernetes.github.io/ingress-nginx'
+      chart: ingress-nginx
+      targetRevision: 4.10.1
+      helm:
+        valueFiles:
+          - $values/cluster-addons/ingress-nginx/values.yaml
+    # 2. Self Git Repo - values.yaml
+    - repoURL: 'https://github.com/sachinthokal/argocd-for-devops.git'
+      targetRevision: main
+      ref: values
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: ingress-nginx
