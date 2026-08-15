@@ -2,6 +2,8 @@
 controller:
   hostPort:
     enabled: true
+  admissionWebhooks:
+    enabled: false
   terminationGracePeriodSeconds: 0
   publishService:
     enabled: false
