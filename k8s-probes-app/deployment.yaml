@@ -1,0 +1,50 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: probs-deployment
+  namespace: probs-ns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: probs-app
+  template:
+    metadata:
+      labels:
+        app: probs-app
+    spec:
+      containers:
+        - name: probs-container
+          image: sachinthokal/k8s_probes_app:v1
+          ports:
+            - containerPort: 3000
+          
+          # 1. STARTUP PROBE (Corrected port and path)
+          startupProbe:
+            httpGet:
+              path: /health/readiness
+              port: 3000
+            periodSeconds: 10
+            failureThreshold: 30
+          
+          # 2. READINESS PROBE
+          readinessProbe:
+            httpGet:
+              path: /health/readiness
+              port: 3000
+            initialDelaySeconds: 3
+            periodSeconds: 3
+            failureThreshold: 3
+            timeoutSeconds: 2
+            successThreshold: 2
+
+          # 3. LIVENESS PROBE (Corrected successThreshold to 1)
+          livenessProbe:
+            httpGet:
+              path: /health/liveness
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 3
+            timeoutSeconds: 2
+            successThreshold: 1   # Must be exactly 1 for livenessProbe

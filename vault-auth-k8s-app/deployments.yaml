@@ -1,0 +1,140 @@
+kind: Namespace
+apiVersion: v1
+metadata: 
+  name: vault-ns
+
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: vault-app-deployment
+  namespace: vault-ns
+  labels:
+    app: vault-app
+    env: prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vault-app
+  template:
+    metadata:
+      labels:
+        app: vault-app
+    spec:
+      containers:
+        - name: vault-app-container
+          image: sachinthokal/vaultauth_k8s_app:v1
+          ports:
+            - containerPort: 5000
+          resources:
+            requests:
+              cpu: 10m
+              memory: 45Mi
+            limits:
+              cpu: 100m
+              memory: 80Mi
+          volumeMounts:
+            - mountPath: /mnt/secrets-store
+              name: vault-config-and-secrets
+              readOnly: true
+          startupProbe:
+            httpGet:
+              path: /healthz/startup
+              port: 5000
+            initialDelaySeconds: 15           # Initial delay 15 sec
+            periodSeconds: 10                 # Freq 10 sec max - 3 times
+            timeoutSeconds: 2                 # Expected resp of req within 2 sec
+            failureThreshold: 3               # If 3 req failed then restart container
+
+          livenessProbe:                      # Checking health of the App if it is failing for 3 time app will get restarted by K8s.
+            httpGet:
+              path: /healthz/liveness
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+
+          readinessProbe:                      # Checking if an app is ready to take the traffic or not. if not then stop sending request to app [ pod will get unready state ]
+            httpGet:
+              path: /healthz/readiness
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3            
+
+      volumes:
+        - name: vault-config-and-secrets
+          projected:
+            sources:
+              - configMap:
+                  name: vault-app-config
+
+              - secret:
+                  name: vault-secrets
+                  
+
+
+      # Volume mounted by the subfolder 
+      #     volumeMounts:
+      #       - mountPath: /mnt/secrets-store/app-password
+      #         name: vault-secrets
+      #         subPath: app-password
+      #         readOnly: true
+      #       - mountPath: /mnt/secrets-store/app-username
+      #         name: vault-app-config
+      #         subPath: app-username
+      #         readOnly: true
+      # volumes:
+      #   - name: vault-app-config
+      #     configMap:
+      #       name: vault-app-config
+      #   - name: vault-secrets
+      #     secret:
+      #       secretName: vault-secrets
+              
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: vault-app-service
+  labels:
+    app: vault-service
+    env: prod
+  namespace: vault-ns
+spec:
+  type: NodePort
+  selector:
+    app: vault-app
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+      nodePort: 30081
+
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: vault-app-config
+  namespace: vault-ns
+  labels:
+    app: vault-app
+    env: dev
+data:
+  app-username: sachinthokal
+
+---
+kind: Secret
+apiVersion: v1
+metadata:
+  name: vault-secrets
+  labels:
+    app: vault-app
+  namespace: vault-ns
+data:
+  app-password: YWRtaW4=
+type: Opaque

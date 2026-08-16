@@ -1,0 +1,13 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: message-viewer-service
+spec:
+  selector:
+    app: message-viewer
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
+      nodePort: 30080
+  type: NodePort

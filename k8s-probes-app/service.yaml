@@ -1,0 +1,15 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: probs-service
+  namespace: probs-ns
+spec:
+  selector:
+    app: probs-app
+
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+      nodePort: 30081

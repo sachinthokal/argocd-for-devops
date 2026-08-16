@@ -1,0 +1,30 @@
+# kind: Service
+# apiVersion: v1
+# metadata:
+#   name: fintrack-service
+#   namespace: fin-ns
+#   labels:
+#     app: fintrack-app
+#     env: prod
+# spec:
+#   selector:
+#     app: fintrack-app
+#   type: NodePort
+#   ports:
+#     - protocol: TCP
+#       port: 5000
+#       targetPort: 5000
+#       nodePort: 30081
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: fintrack-service
+  namespace: fin-ns
+spec:
+  type: ClusterIP
+  selector:
+    app: fintrack-app
+  ports:
+  - port: 80
+    targetPort: 5000

@@ -1,0 +1,30 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: fintrack-deployment
+  labels:
+    app: fintrack-app
+    env: prod
+  namespace: fin-ns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fintrack-app
+  template:
+    metadata:
+      labels:
+        app: fintrack-app
+    spec:
+      containers:
+        - name: fintrack-container
+          image: sachinthokal/fintrack_app:v1
+          ports:
+            - containerPort: 5000
+          resources:
+            requests:
+              cpu: 100m
+              memory: 250Mi
+            limits:
+              cpu: 200m
+              memory: 400Mi

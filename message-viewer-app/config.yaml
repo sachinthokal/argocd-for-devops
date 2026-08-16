@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: message-viewer-config
+data:
+  APP_MESSAGE: "Message coming from K8s ConfigMap 🚀"
+  APP_THEME: "Premium-Purple"

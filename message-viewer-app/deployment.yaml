@@ -1,0 +1,35 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: message-viewer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: message-viewer
+  template:
+    metadata:
+      labels:
+        app: message-viewer
+    spec:
+      containers:
+        - name: message-viewer
+          image: sachinthokal/message_viewer_app:v1.0.1
+          ports:
+            - containerPort: 5000
+          env:
+            - name: APP_MESSAGE
+              valueFrom:
+                configMapKeyRef:
+                  name: message-viewer-config
+                  key: APP_MESSAGE 
+            - name: APP_THEME
+              valueFrom:
+                configMapKeyRef:
+                  name: message-viewer-config
+                  key: APP_THEME
+            - name: APP_MESSAGE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: APP_MESSAGE_PASSWORD
+                  name: message-viewer-secret

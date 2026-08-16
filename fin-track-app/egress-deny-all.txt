@@ -1,0 +1,12 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-all-egress
+  namespace: fin-ns
+spec:
+  podSelector:
+    matchLabels:
+      app: fintrack-app
+  policyTypes:
+  - Egress
+  egress: [] # Empty list = All outbound traffic fully closed.

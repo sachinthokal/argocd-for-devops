@@ -1,0 +1,51 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: vaultauth-k8s-app-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vaultauth-k8s-app
+  template:
+    metadata:
+      labels:
+        app: vaultauth-k8s-app
+    spec:
+      containers:
+        - name: vaultauth-k8s-app-container
+          image: sachinthokal/vaultauth_k8s_app:v1
+          ports:
+            - containerPort: 5000
+          volumeMounts:
+            - name: secrets-store-config
+              mountPath: /mnt/secrets-store
+              readOnly: true
+          resources:
+            limits:
+              memory: "50Mi"
+              cpu: "10m"
+            requests:
+              memory: "45Mi"
+              cpu: "4m"
+              
+      volumes:
+        - name: secrets-store-config
+          secret:
+            secretName: app-secrets
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: vaultauth-k8s-app-service
+spec:
+  selector:
+    app: vaultauth-k8s-app
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+      nodePort: 30081

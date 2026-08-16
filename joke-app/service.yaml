@@ -1,11 +1,17 @@
-apiVersion: v1
 kind: Service
+apiVersion: v1
 metadata:
   name: joke-app-service
+  labels:
+    app: joke-app
+    environment: production
+  namespace: joke-app-ns
 spec:
-  type: LoadBalancer
+  type: NodePort
   selector:
     app: joke-app
   ports:
-    - port: 80
+    - protocol: TCP
+      port: 5000
       targetPort: 5000
+      nodePort: 30082
