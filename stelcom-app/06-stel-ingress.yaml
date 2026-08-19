@@ -1,0 +1,27 @@
+kind: Ingress
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: stel-ingress
+  namespace: stel-ns
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: localhost
+    http:
+      paths:
+      # Frontend
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: stelcom-frontend-service
+            port:
+              number: 80
+      # Backend
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: stelcom-backend-service
+            port:
+              number: 8080

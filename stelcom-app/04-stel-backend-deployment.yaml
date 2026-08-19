@@ -1,0 +1,66 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: stelcom-backend-deployment
+  namespace: stel-ns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stelcom-backend-app
+  template:
+    metadata:
+      labels:
+        app: stelcom-backend-app
+    spec:
+      containers:
+        - name: stelcom-backend-container
+          image: sachinthokal/stelcom-backend:v2
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: stel-config
+                  key: DB_URL
+            - name: DB_DRIVER
+              valueFrom:
+                configMapKeyRef:
+                  name: stel-config
+                  key: DB_DRIVER
+            - name: DB_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: stel-config
+                  key: DB_USER
+            
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: stel-db-secrets
+                  key: DB_PASSWORD
+                    
+            - name: GATEWAY_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: stel-db-secrets
+                  key: GATEWAY_API_KEY
+
+            - name: ALLOWED_ORIGINS
+              value: "*"  
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: stelcom-backend-service
+  namespace: stel-ns
+spec:
+  type: ClusterIP
+  selector:
+    app: stelcom-backend-app
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080

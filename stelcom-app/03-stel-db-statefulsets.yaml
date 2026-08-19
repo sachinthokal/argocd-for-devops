@@ -1,0 +1,67 @@
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: postgres-statefulset
+  namespace: stel-ns
+spec:
+  serviceName: "postgres-service"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres-conatiner
+          image: postgres:15-alpine
+          env:
+            # Database required Username & Password
+            # 1. DB User (POSTGRES_USER)
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: stel-config
+                  key: DB_USER
+
+            # 2. DB Password (POSTGRES_PASSWORD)
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: stel-db-secrets
+                  key: DB_PASSWORD
+                  
+            # 3. DB Name
+            - name: POSTGRES_DB
+              value: "stelcom_db"
+
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: init-db
+              mountPath: /docker-entrypoint-initdb.d/schema.sql
+              subPath: schema.sql
+      volumes:
+        - name: init-db
+          configMap:
+            name: stel-config
+            items:
+              - key: schema.sql
+                path: schema.sql
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: postgres-service
+  namespace: stel-ns
+spec:
+  clusterIP: None
+  selector:
+    app: postgres
+  ports:
+    - port: 5432
+      targetPort: 5432
