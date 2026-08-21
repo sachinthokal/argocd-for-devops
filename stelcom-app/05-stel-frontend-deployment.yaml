@@ -1,9 +1,26 @@
-kind: Deployment
+###############################################################################
+# Telecom Frontend UI Deployment & ClusterIP Service
+# -----------------------------------------------------------------------------
+# PURPOSE:
+# Deploys the static/SPA web user interface (React/Angular/Vue/HTML)
+# served via NGINX/Web server on container port 80.
+# Exposes the frontend internally for the Ingress Controller to route traffic.
+###############################################################################
+
+# -----------------------------------------------------------------------------
+# 1. Frontend Application Deployment
+# -----------------------------------------------------------------------------
 apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: stelcom-frontend-deployment
   namespace: stel-ns
+  labels:
+    app.kubernetes.io/name: stelcom-frontend
+    app.kubernetes.io/component: frontend
+    app.kubernetes.io/managed-by: argocd
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: stelcom-frontend-app    
@@ -11,25 +28,36 @@ spec:
     metadata:
       labels:
         app: stelcom-frontend-app
+        app.kubernetes.io/name: stelcom-frontend
     spec:
       containers:
         - name: stelcom-frontend-container
-          image: sachinthokal/stelcom-frontend:v3
+          image: sachinthokal/stelcom-frontend:v5
+          imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 80
-          
+            - name: http-web
+              containerPort: 80
+
 ---
-kind: Service
+
+# -----------------------------------------------------------------------------
+# 2. Frontend ClusterIP Service
+# -----------------------------------------------------------------------------
 apiVersion: v1
+kind: Service
 metadata:
   name: stelcom-frontend-service
   namespace: stel-ns
+  labels:
+    app.kubernetes.io/name: stelcom-frontend
+    app.kubernetes.io/component: frontend-service
 spec:
+  # ClusterIP exposes the web service internally for the Ingress Controller
+  type: ClusterIP
   selector:
     app: stelcom-frontend-app
-  type: ClusterIP
   ports:
-    - protocol: TCP
+    - name: http
+      protocol: TCP
       port: 80
       targetPort: 80
-    

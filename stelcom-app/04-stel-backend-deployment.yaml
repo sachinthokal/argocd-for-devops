@@ -1,8 +1,24 @@
-kind: Deployment
+###############################################################################
+# Spring Boot Backend Service Deployment & ClusterIP Service
+# -----------------------------------------------------------------------------
+# PURPOSE:
+# Deploys the Telecom Spring Boot backend application container.
+# Injects database credentials and API keys via Vault Secrets Store CSI Driver
+# and exposes the microservice internally on port 8080.
+###############################################################################
+
+# -----------------------------------------------------------------------------
+# 1. Backend Application Deployment
+# -----------------------------------------------------------------------------
 apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: stelcom-backend-deployment
   namespace: stel-ns
+  labels:
+    app.kubernetes.io/name: stelcom-backend
+    app.kubernetes.io/component: backend
+    app.kubernetes.io/managed-by: argocd
 spec:
   replicas: 1
   selector:
@@ -12,55 +28,98 @@ spec:
     metadata:
       labels:
         app: stelcom-backend-app
+        app.kubernetes.io/name: stelcom-backend
     spec:
+      # Bound to Vault Kubernetes Auth Role (`myapp-role`)
+      serviceAccountName: myapp-sa
+
       containers:
         - name: stelcom-backend-container
-          image: sachinthokal/stelcom-backend:v2
+          image: sachinthokal/stelcom-backend:v4
+          imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 8080
+            - name: http-backend
+              containerPort: 8080
+
+          # Application environment variables populated from Vault via K8s Secret sync
           env:
+            # CORS policy setting for frontend/gateway communication
+            - name: ALLOWED_ORIGINS
+              value: "*"
+
+            # Database Configuration & Secrets
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: app-env-secrets
+                  key: POSTGRES_DB     
+
             - name: DB_URL
               valueFrom:
-                configMapKeyRef:
-                  name: stel-config
+                secretKeyRef:
+                  name: app-env-secrets
                   key: DB_URL
+
             - name: DB_DRIVER
               valueFrom:
-                configMapKeyRef:
-                  name: stel-config
+                secretKeyRef:
+                  name: app-env-secrets
                   key: DB_DRIVER
+
             - name: DB_USER
               valueFrom:
-                configMapKeyRef:
-                  name: stel-config
+                secretKeyRef:
+                  name: app-env-secrets
                   key: DB_USER
-            
+
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: stel-db-secrets
+                  name: app-env-secrets
                   key: DB_PASSWORD
-                    
+
+            # Gateway security API key
             - name: GATEWAY_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: stel-db-secrets
+                  name: app-env-secrets
                   key: GATEWAY_API_KEY
 
-            - name: ALLOWED_ORIGINS
-              value: "*"  
+          volumeMounts:
+            # CSI Volume mount: Triggers Vault secret retrieval & K8s secret creation
+            - name: vault-secrets-config
+              mountPath: "/mnt/secrets-store"
+              readOnly: true
+
+      volumes:
+        # Secrets Store CSI Driver linking to Vault SecretProviderClass
+        - name: vault-secrets-config
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: "vault-db-creds"
+
 ---
 
-kind: Service
+# -----------------------------------------------------------------------------
+# 2. Backend ClusterIP Service
+# -----------------------------------------------------------------------------
 apiVersion: v1
+kind: Service
 metadata:
   name: stelcom-backend-service
   namespace: stel-ns
+  labels:
+    app.kubernetes.io/name: stelcom-backend
+    app.kubernetes.io/component: backend-service
 spec:
+  # ClusterIP exposes the service internally inside the Kubernetes cluster
   type: ClusterIP
   selector:
     app: stelcom-backend-app
   ports:
-    - protocol: TCP
+    - name: http
+      protocol: TCP
       port: 8080
       targetPort: 8080

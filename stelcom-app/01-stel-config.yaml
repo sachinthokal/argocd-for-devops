@@ -1,14 +1,27 @@
-kind: ConfigMap
+###############################################################################
+# PostgreSQL Initialization Database Schema & Seed Data
+# -----------------------------------------------------------------------------
+# PURPOSE:
+# Stores the DDL schema and initial seed records for the Telecom application.
+# This ConfigMap is mounted into `/docker-entrypoint-initdb.d/` in the 
+# PostgreSQL StatefulSet/Pod to automatically execute on the first container startup.
+###############################################################################
+
 apiVersion: v1
+kind: ConfigMap
 metadata:
   name: stel-config
   namespace: stel-ns
+  labels:
+    app.kubernetes.io/name: telecom-app
+    app.kubernetes.io/component: database-init
+    app.kubernetes.io/managed-by: terraform-or-argocd
 data:
-  DB_URL: "jdbc:postgresql://postgres-service:5432/stelcom_db"
-  DB_DRIVER: "org.postgresql.Driver"
-  DB_USER: "stelcom_admin"
-
   schema.sql: |
+    -- =========================================================================
+    -- 1. SUBSCRIBERS TABLE
+    -- Stores customer telecom profiles, balances, data packs, and validity
+    -- =========================================================================
     CREATE TABLE IF NOT EXISTS subscribers (
       id BIGSERIAL PRIMARY KEY,
       msisdn VARCHAR(15) UNIQUE NOT NULL,
@@ -21,18 +34,25 @@ data:
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
 
+    -- =========================================================================
+    -- 2. RECHARGE TRANSACTIONS TABLE
+    -- Audit log for tracking all customer recharge attempts and status
+    -- =========================================================================
     CREATE TABLE IF NOT EXISTS recharge_transactions (
-        id BIGSERIAL PRIMARY KEY,
-        conv_id VARCHAR(100) NOT NULL,
-        msisdn VARCHAR(15) NOT NULL,
-        plan_id VARCHAR(50) NOT NULL,
-        amount NUMERIC(10, 2) NOT NULL,
-        status VARCHAR(20) NOT NULL,
-        txn_ref VARCHAR(100) NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      id BIGSERIAL PRIMARY KEY,
+      conv_id VARCHAR(100) NOT NULL,
+      msisdn VARCHAR(15) NOT NULL,
+      plan_id VARCHAR(50) NOT NULL,
+      amount NUMERIC(10, 2) NOT NULL,
+      status VARCHAR(20) NOT NULL,
+      txn_ref VARCHAR(100) NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
 
-    -- Real PostgreSQL Upsert
+    -- =========================================================================
+    -- 3. SEED DATA (Default Initial Subscriber)
+    -- Uses ON CONFLICT to make schema initialization idempotent
+    -- =========================================================================
     INSERT INTO subscribers (msisdn, subscriber_name, balance, daily_data, active_plan, plan_validity)
     VALUES ('9876543210', 'Sachin Thokal', 142.50, '1.25 GB / 1.5 GB', 'UNLTD_28D_1.5GB', CURRENT_DATE)
     ON CONFLICT (msisdn) DO NOTHING;

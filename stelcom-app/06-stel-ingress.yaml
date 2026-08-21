@@ -1,27 +1,59 @@
-kind: Ingress
+###############################################################################
+# NGINX Ingress Routing Configuration
+# -----------------------------------------------------------------------------
+# PURPOSE:
+# Routes external HTTP/HTTPS traffic entering through the Kind HostPort (80/443)
+# to internal microservices based on URL path prefixes:
+#   • `/`    --> Stelcom Web UI (`stelcom-frontend-service:80`)
+#   • `/api` --> Spring Boot REST APIs (`stelcom-backend-service:8080`)
+###############################################################################
+
 apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
   name: stel-ingress
   namespace: stel-ns
+  labels:
+    app.kubernetes.io/name: stelcom-ingress
+    app.kubernetes.io/component: networking
+    app.kubernetes.io/managed-by: argocd
+  annotations:
+    # Disable strict SSL redirect for seamless local HTTP access
+    ingress.kubernetes.io/ssl-redirect: "false"
+    
+    # Client body buffer limit for large API payloads
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    
+    # Enable CORS headers for frontend-to-backend API calls
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, PUT, POST, DELETE, PATCH, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization"
 spec:
   ingressClassName: nginx
   rules:
-  - host: localhost
-    http:
-      paths:
-      # Frontend
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: stelcom-frontend-service
-            port:
-              number: 80
-      # Backend
-      - path: /api
-        pathType: Prefix
-        backend:
-          service:
-            name: stelcom-backend-service
-            port:
-              number: 8080
+    - host: localhost
+      http:
+        paths:
+          # ===================================================================
+          # 1. FRONTEND WEB APPLICATION ROUTE
+          # Handles root path and static web assets
+          # ===================================================================
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: stelcom-frontend-service
+                port:
+                  number: 80
+
+          # ===================================================================
+          # 2. BACKEND REST API ROUTE
+          # Routes backend API requests to the Spring Boot service
+          # ===================================================================
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: stelcom-backend-service
+                port:
+                  number: 8080

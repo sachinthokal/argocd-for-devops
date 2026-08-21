@@ -1,8 +1,24 @@
-kind: StatefulSet
+###############################################################################
+# PostgreSQL Database Deployment (StatefulSet & Headless Service)
+# -----------------------------------------------------------------------------
+# PURPOSE:
+# Deploys a persistent PostgreSQL v15 database instance for the Telecom stack.
+# Uses HashiCorp Vault Secrets Store CSI Driver for dynamic credential injection
+# and auto-initializes the schema via ConfigMap (`stel-config`).
+###############################################################################
+
+# -----------------------------------------------------------------------------
+# 1. PostgreSQL StatefulSet
+# -----------------------------------------------------------------------------
 apiVersion: apps/v1
+kind: StatefulSet
 metadata:
   name: postgres-statefulset
   namespace: stel-ns
+  labels:
+    app.kubernetes.io/name: telecom-db
+    app.kubernetes.io/component: database
+    app.kubernetes.io/managed-by: argocd
 spec:
   serviceName: "postgres-service"
   replicas: 1
@@ -13,55 +29,89 @@ spec:
     metadata:
       labels:
         app: postgres
+        app.kubernetes.io/name: telecom-db
     spec:
+      # Bound to Vault Kubernetes Auth Role (`myapp-role`)
+      serviceAccountName: myapp-sa
+
       containers:
-        - name: postgres-conatiner
+        - name: postgres-container
           image: postgres:15-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: postgres
+              containerPort: 5432
+
+          # Database environment variables populated by SecretProviderClass sync
           env:
-            # Database required Username & Password
             # 1. DB User (POSTGRES_USER)
             - name: POSTGRES_USER
               valueFrom:
-                configMapKeyRef:
-                  name: stel-config
+                secretKeyRef:
+                  name: app-env-secrets
                   key: DB_USER
 
             # 2. DB Password (POSTGRES_PASSWORD)
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: stel-db-secrets
+                  name: app-env-secrets
                   key: DB_PASSWORD
                   
-            # 3. DB Name
+            # 3. DB Name (POSTGRES_DB)
             - name: POSTGRES_DB
-              value: "stelcom_db"
+              valueFrom:
+                secretKeyRef:
+                  name: app-env-secrets
+                  key: POSTGRES_DB              
 
-          ports:
-            - containerPort: 5432
           volumeMounts:
+            # Mount DB initialization schema (Runs only on fresh DB setup)
             - name: init-db
               mountPath: /docker-entrypoint-initdb.d/schema.sql
               subPath: schema.sql
+      
+            # CSI Volume mount: Triggers Vault secret retrieval & K8s secret creation
+            - name: vault-secrets-config
+              mountPath: "/mnt/secrets-store"
+              readOnly: true
+
       volumes:
+        # DB Initialization Script from ConfigMap
         - name: init-db
           configMap:
             name: stel-config
             items:
               - key: schema.sql
                 path: schema.sql
+        
+        # Secrets Store CSI Driver linking to Vault SecretProviderClass
+        - name: vault-secrets-config
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: "vault-db-creds"
 
 ---
 
-kind: Service
+# -----------------------------------------------------------------------------
+# 2. PostgreSQL Headless Service (Internal Cluster DNS Resolution)
+# -----------------------------------------------------------------------------
 apiVersion: v1
+kind: Service
 metadata:
   name: postgres-service
   namespace: stel-ns
+  labels:
+    app.kubernetes.io/name: telecom-db
+    app.kubernetes.io/component: database-service
 spec:
+  # Headless service allows direct network identity for StatefulSet pods
   clusterIP: None
   selector:
     app: postgres
   ports:
-    - port: 5432
+    - name: postgres
+      port: 5432
       targetPort: 5432

@@ -1,0 +1,98 @@
+###############################################################################
+# HashiCorp Vault Integration via Secrets Store CSI Driver
+# -----------------------------------------------------------------------------
+# PURPOSE:
+# Fetches application & DB secrets from HashiCorp Vault and automatically
+# syncs them into a native Kubernetes Secret (`app-env-secrets`).
+#
+# PREREQUISITES:
+# 1. Secrets Store CSI Driver + Vault CSI Provider installed in cluster.
+# 2. Vault Kubernetes Auth enabled with role `myapp-role` bound to `myapp-sa`.
+# 3. Secrets stored at Vault KV v2 path: `secret/data/myapp/config`.
+###############################################################################
+
+# -----------------------------------------------------------------------------
+# 1. Kubernetes Service Account for Vault Authentication
+# -----------------------------------------------------------------------------
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: myapp-sa
+  namespace: stel-ns
+  labels:
+    app.kubernetes.io/name: telecom-app
+    app.kubernetes.io/component: authentication
+
+---
+
+# -----------------------------------------------------------------------------
+# 2. SecretProviderClass Definition
+# -----------------------------------------------------------------------------
+apiVersion: secrets-store.csi.x-k8s.io/v1
+kind: SecretProviderClass
+metadata:
+  name: vault-db-creds
+  namespace: stel-ns
+  labels:
+    app.kubernetes.io/name: telecom-app
+    app.kubernetes.io/component: secrets-provider
+spec:
+  provider: vault
+  parameters:
+    # Internal cluster DNS endpoint for Vault Server
+    vaultAddress: "http://vault.vault.svc.cluster.local:8200"
+    
+    # Vault role configured with access policy and mapped to 'myapp-sa'
+    roleName: "myapp-role"
+    
+    # Array of secrets to fetch from Vault KV engine (v2 format: secret/data/<path>)
+    objects: |
+      - objectName: "POSTGRES_DB"
+        secretPath: "secret/data/myapp/config"
+        secretKey: "DB_Name"
+
+      - objectName: "DB_USER"
+        secretPath: "secret/data/myapp/config"
+        secretKey: "DB_USER"
+
+      - objectName: "DB_PASSWORD"
+        secretPath: "secret/data/myapp/config"
+        secretKey: "DB_PASSWORD"
+
+      - objectName: "DB_URL"
+        secretPath: "secret/data/myapp/config"
+        secretKey: "DB_URL"
+
+      - objectName: "DB_DRIVER"
+        secretPath: "secret/data/myapp/config"
+        secretKey: "DB_DRIVER"
+
+      - objectName: "GATEWAY_API_KEY"
+        secretPath: "secret/data/myapp/config"
+        secretKey: "GATEWAY_API_KEY"
+
+  # ---------------------------------------------------------------------------
+  # Kubernetes Secret Auto-Sync (Creates/Updates native K8s Secret)
+  # NOTE: Pod must mount this volume for the syncSecret mechanism to trigger.
+  # ---------------------------------------------------------------------------
+  secretObjects:
+    - secretName: app-env-secrets
+      type: Opaque
+      data:
+        - objectName: "POSTGRES_DB"
+          key: "POSTGRES_DB"
+
+        - objectName: "DB_USER"
+          key: "DB_USER"
+
+        - objectName: "DB_PASSWORD"
+          key: "DB_PASSWORD"
+
+        - objectName: "DB_URL"
+          key: "DB_URL"
+
+        - objectName: "DB_DRIVER"
+          key: "DB_DRIVER"
+          
+        - objectName: "GATEWAY_API_KEY"
+          key: "GATEWAY_API_KEY"

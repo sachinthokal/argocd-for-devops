@@ -1,4 +1,17 @@
-kind: Namespace
+###############################################################################
+# Kubernetes Namespace Definition
+# -----------------------------------------------------------------------------
+# PURPOSE:
+# Creates an isolated logical workspace (`stel-ns`) to deploy the Stelcom 
+# application stack, including PostgreSQL DB, backend services, and frontends.
+###############################################################################
+
 apiVersion: v1
+kind: Namespace
 metadata:
   name: stel-ns
+  labels:
+    name: stel-ns
+    app.kubernetes.io/name: stelcom-app
+    app.kubernetes.io/managed-by: terraform-or-argocd
+    environment: production
