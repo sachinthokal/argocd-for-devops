@@ -45,6 +45,40 @@ spec:
               cpu: 500m
               memory: 128Mi
 
+          # -------------------------------------------------------------------
+          # Health Probes
+          # -------------------------------------------------------------------
+          # 1. Startup Probe: Ensures NGINX has initialized before other probes run
+          startupProbe:
+            httpGet:
+              path: /
+              port: http-web
+            initialDelaySeconds: 3
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 6
+
+          # 2. Liveness Probe: Restarts the container if the web server hangs or crashes
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http-web
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+          # 3. Readiness Probe: Checks if NGINX is ready to receive Ingress traffic
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http-web
+            initialDelaySeconds: 3
+            periodSeconds: 5
+            timeoutSeconds: 2
+            successThreshold: 1
+            failureThreshold: 3
+
 ---
 
 # -----------------------------------------------------------------------------
