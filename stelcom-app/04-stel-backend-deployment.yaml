@@ -41,6 +41,49 @@ spec:
             - name: http-backend
               containerPort: 8080
 
+          # Resource Quotas (CPU & Memory Requests/Limits)
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+
+          # -------------------------------------------------------------------
+          # Health Probes (Spring Boot Actuator Integration)
+          # -------------------------------------------------------------------
+          # 1. Startup Probe: Allows slow-starting Java apps time to initialize
+          startupProbe:
+            httpGet:
+              path: /api/actuator/health
+              port: http-backend
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 30
+
+          # 2. Liveness Probe: Restarts container if the app crashes or deadlocks
+          livenessProbe:
+            httpGet:
+              path: /api/actuator/health/liveness
+              port: http-backend
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+          # 3. Readiness Probe: Routes traffic only when DB and app are fully ready
+          readinessProbe:
+            httpGet:
+              path: /api/actuator/health/readiness
+              port: http-backend
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 3
+            successThreshold: 1
+            failureThreshold: 3
+
           # Application environment variables populated from Vault via K8s Secret sync
           env:
             # CORS policy setting for frontend/gateway communication
