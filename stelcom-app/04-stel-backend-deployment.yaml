@@ -35,7 +35,7 @@ spec:
 
       containers:
         - name: stelcom-backend-container
-          image: sachinthokal/stelcom-backend:v6
+          image: sachinthokal/stelcom-backend:v7
           imagePullPolicy: IfNotPresent
           ports:
             - name: http-backend
