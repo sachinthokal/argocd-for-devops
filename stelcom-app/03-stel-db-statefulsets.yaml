@@ -42,6 +42,57 @@ spec:
             - name: postgres
               containerPort: 5432
 
+          # -------------------------------------------------------------------
+          # Resource Limits & Requests
+          # -------------------------------------------------------------------
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+
+          # -------------------------------------------------------------------
+          # Database Health Probes (Using pg_isready CLI utility)
+          # -------------------------------------------------------------------
+          # 1. Startup Probe: Allows initial database initialization and schema setup
+          startupProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 20
+
+          # 2. Liveness Probe: Restarts container if PostgreSQL engine hangs or deadlocks
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+          # 3. Readiness Probe: Accepts connections only when PostgreSQL is ready for queries
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+            successThreshold: 1
+            failureThreshold: 3
+
           # Database environment variables populated by SecretProviderClass sync
           env:
             # 1. DB User (POSTGRES_USER)
@@ -63,7 +114,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: app-env-secrets
-                  key: POSTGRES_DB              
+                  key: POSTGRES_DB                
 
           volumeMounts:
             # Mount DB initialization schema (Runs only on fresh DB setup)
