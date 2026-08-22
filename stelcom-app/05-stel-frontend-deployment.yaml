@@ -32,7 +32,7 @@ spec:
     spec:
       containers:
         - name: stelcom-frontend-container
-          image: sachinthokal/stelcom-frontend:v5
+          image: sachinthokal/stelcom-frontend:v6
           imagePullPolicy: IfNotPresent
           ports:
             - name: http-web
