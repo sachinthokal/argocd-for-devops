@@ -6,8 +6,9 @@ metadata:
 plugin: ip-restriction
 config:
   allow:
-    - 127.0.0.1
-    - 10.0.0.0/8
-    - 172.16.0.0/12
-    - 192.168.0.0/16
-    # - 8.8.8.8         Dummy IP For Checks
+    - 127.0.0.1       # IPv4 Localhost 
+    - "::1"           # IPv6 Localhost
+    - 10.0.0.0/8      # K8s Internal Pods IP
+    - 172.16.0.0/12   # K8s Docker/Nodes IP
+    - 192.168.0.0/16  # Local Private Network
+    # - 8.8.8.8       # Dummy IP for Checks

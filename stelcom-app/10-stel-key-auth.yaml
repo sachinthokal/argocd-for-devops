@@ -7,12 +7,19 @@ plugin: key-auth
 config:
   key_names:
     - X-Api-Key
+    - apikey
+    - x-api-key
+  key_in_header: true
+  key_in_query: true
+  hide_credentials: false
 ---
 apiVersion: configuration.konghq.com/v1
 kind: KongConsumer
 metadata:
   name: stelcom-consumer
   namespace: stel-ns
+  annotations:
+    kubernetes.io/ingress.class: kong
+username: stelcom-consumer
 credentials:
   - kong-keyauth-secret
-username: stelcom-consumer
