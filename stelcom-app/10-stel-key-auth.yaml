@@ -1,0 +1,18 @@
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: stel-key-auth
+  namespace: stel-ns
+plugin: key-auth
+config:
+  key_names:
+    - X-Api-Key
+---
+apiVersion: configuration.konghq.com/v1
+kind: KongConsumer
+metadata:
+  name: stelcom-consumer
+  namespace: stel-ns
+credentials:
+  - kong-keyauth-secret
+username: stelcom-consumer

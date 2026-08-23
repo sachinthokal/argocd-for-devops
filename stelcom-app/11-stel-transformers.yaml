@@ -1,0 +1,25 @@
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: stel-request-transformer
+  namespace: stel-ns
+plugin: request-transformer
+config:
+  add:
+    headers:
+      - "X-Gateway-Processed: Kong-Core-5G"
+      - "X-Internal-Cluster: stelcom-k8s-prod"
+---
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: stel-response-transformer
+  namespace: stel-ns
+plugin: response-transformer
+config:
+  add:
+    headers:
+      - "X-Powered-By: STelCoM-Engine-V6"
+  remove:
+    headers:
+      - "X-Application-Context"

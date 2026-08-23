@@ -1,0 +1,82 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: stel-app-route
+  namespace: stel-ns
+spec:
+  parentRefs:
+  - name: kong-gateway
+    namespace: default
+  hostnames:
+  - "myapp.example.com"
+  - "localhost"
+  rules:
+  # 1. Protected POST APIs (Key-Auth + Rate Limiting 🔒)
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /api
+      method: POST
+    filters:
+    # 👇 Auth GW-API-KEY Filter
+    - type: ExtensionRef
+      extensionRef:
+        group: configuration.konghq.com
+        kind: KongPlugin
+        name: stel-key-auth
+    # 👇 Rate Limiting Filter
+    - type: ExtensionRef
+      extensionRef:
+        group: configuration.konghq.com
+        kind: KongPlugin
+        name: stel-rate-limit
+    # 👇 Transformers Filter
+    - type: ExtensionRef
+      extensionRef:
+        group: configuration.konghq.com
+        kind: KongPlugin
+        name: stel-request-transformer
+    - type: ExtensionRef
+      extensionRef:
+        group: configuration.konghq.com
+        kind: KongPlugin
+        name: stel-response-transformer
+    # 👇 Prometheus Plugin Filter
+    - type: ExtensionRef
+      extensionRef:
+        group: configuration.konghq.com
+        kind: KongPlugin
+        name: stel-prometheus
+    backendRefs:
+    - name: stelcom-backend-service
+      port: 8080
+
+  # 2. Public GET APIs (Ping, Metrics, Summary, Plans -> Direct Allow 🔓, GET APIs (IP-Restriction + Correlation ID)
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /api
+      method: GET
+    filters:
+    - type: ExtensionRef
+      extensionRef:
+        group: configuration.konghq.com
+        kind: KongPlugin
+        name: stel-ip-restriction
+    - type: ExtensionRef
+      extensionRef:
+        group: configuration.konghq.com
+        kind: KongPlugin
+        name: stel-correlation-id
+    backendRefs:
+    - name: stelcom-backend-service
+      port: 8080
+
+  # 3. Frontend Web UI (Public 🔓)
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: stelcom-frontend-service
+      port: 80
