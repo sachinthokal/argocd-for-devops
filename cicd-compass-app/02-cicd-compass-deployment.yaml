@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: cicd-compass-container
-          image: sachinthokal/cicd-compass-app:v1.0.0
+          image: sachinthokal/cicd-compass-app:v1.0.1
           ports:
             - containerPort: 8080
           envFrom:
