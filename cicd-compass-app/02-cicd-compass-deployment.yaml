@@ -21,29 +21,6 @@ spec:
           image: sachinthokal/cicd-compass-app:v1.0.0
           ports:
             - containerPort: 8080
-          env:
-            - name: APP_NAME
-              valueFrom:
-                configMapKeyRef:
-                  name: cicd-compass-configmap
-                  key: APP_NAME
-            - name: APP_ENVIRONMENT
-              valueFrom:
-                configMapKeyRef:
-                  name: cicd-compass-configmap
-                  key: APP_ENVIRONMENT
-            - name: APP_VERSION
-              valueFrom:
-                configMapKeyRef:
-                  name: cicd-compass-configmap
-                  key: APP_VERSION
-            - name: APP_REGION
-              valueFrom:
-                configMapKeyRef:
-                  name: cicd-compass-configmap
-                  key: APP_REGION
-            - name: APP_BUILDNUMBER
-              valueFrom:
-                configMapKeyRef:
-                  name: cicd-compass-configmap
-                  key: APP_BUILDNUMBER
+          envFrom:
+            - configMapRef:
+                name: cicd-compass-configmap
