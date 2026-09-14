@@ -12,6 +12,7 @@ spec:
       app: cicd-compass
   template:
     metadata:
+      name: cicd-compass-pod
       labels:
         app: cicd-compass
     spec:
