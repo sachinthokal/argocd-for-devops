@@ -1,0 +1,22 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: cicd-compass-deployment
+  namespace: compass
+  labels:
+    app: cicd-compass
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cicd-compass
+  template:
+    metadata:
+      labels:
+        app: cicd-compass
+    spec:
+      containers:
+        - name: cicd-compass-container
+          image: sachinthokal/cicd-compass-app:v1.0.0
+          ports:
+            - containerPort: 8080
