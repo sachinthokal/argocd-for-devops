@@ -8,6 +8,6 @@ metadata:
 data:
   APP_NAME: "cicd-compass-app-prod"
   APP_ENVIRONMENT: "production-k8s"
-  APP_VERSION: "v1.0.1"
+  APP_VERSION: "v1.0.0"
   APP_REGION: "us-east-1"
-  APP_BUILDNUMBER: "build-1799"
+  APP_BUILDNUMBER: "build-01"
