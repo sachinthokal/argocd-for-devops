@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: cicd-compass-container
-          image: sachinthokal/cicd-compass-app@sha256:5fe9b1d50bfb75734526958d511622b508c9a04437c0dfc0494fb68a0ee594e7
+          image: sachinthokal/cicd-compass-app@sha256:2c2997304c0053a9ba1b4d790924116df9c5bc9a66d1d10bdbe31fd4f30ec62c
           ports:
             - containerPort: 8080
           envFrom:
