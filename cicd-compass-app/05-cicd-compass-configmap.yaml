@@ -8,4 +8,4 @@ data:
   APP_ENVIRONMENT: "production-green"
   APP_VERSION: "v1.2.0"
   APP_REGION: "us-east-1"
-  APP_BUILDNUMBER: "sha-5f21280"
+  APP_BUILDNUMBER: "sha-9a422a8"
