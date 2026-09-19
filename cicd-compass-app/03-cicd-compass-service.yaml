@@ -6,6 +6,7 @@ metadata:
 spec:
   selector:
     app: cicd-compass
+    version: blue
   ports:
     - protocol: TCP
       port: 80

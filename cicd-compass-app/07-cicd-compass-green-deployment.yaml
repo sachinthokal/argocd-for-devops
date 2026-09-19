@@ -1,31 +1,26 @@
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: cicd-compass-deployment-blue
+  name: cicd-compass-deployment-green
   namespace: compass
   labels:
     app: cicd-compass
 spec:
   replicas: 3
-  # strategy:
-  #   type: RollingUpdate
-  #   rollingUpdate:
-  #     maxSurge: 1 # Max extra pods limit while update (1 extra pod will create)
-  #     maxUnavailable: 0 # Max unavailable pods while update (Zero pods - zero downtime)
   selector:
     matchLabels:
       app: cicd-compass
-      version: blue
+      version: green
   template:
     metadata:
       name: cicd-compass-pod
       labels:
         app: cicd-compass
-        version: blue
+        version: green
     spec:
       containers:
         - name: cicd-compass-container
-          image: sachinthokal/cicd-compass-app@sha256:e2610af28c89c76ece23741067fd5c0a87d9d19acf9305fd7a594e0da20db21e
+          image: sachinthokal/cicd-compass-app:v1.2.0
           ports:
             - containerPort: 8080
           envFrom:
