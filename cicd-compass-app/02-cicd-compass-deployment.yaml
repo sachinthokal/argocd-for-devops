@@ -7,6 +7,11 @@ metadata:
     app: cicd-compass
 spec:
   replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1         # Max extra pods limit while update (1 extra pod will create)
+      maxUnavailable: 0   # Max unavailable pods while update (Zero pods - zero downtime)
   selector:
     matchLabels:
       app: cicd-compass
