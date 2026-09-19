@@ -6,6 +6,6 @@ metadata:
 data:
   APP_NAME: "cicd-compass-app-prod"
   APP_ENVIRONMENT: "production-blue"
-  APP_VERSION: "v1.2.0"
+  APP_VERSION: "v1.2.1"
   APP_REGION: "us-east-1"
-  APP_BUILDNUMBER: "sha-9a422a8"
+  APP_BUILDNUMBER: "sha-93bed80"
