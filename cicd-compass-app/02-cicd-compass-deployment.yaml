@@ -10,8 +10,8 @@ spec:
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxSurge: 1         # Max extra pods limit while update (1 extra pod will create)
-      maxUnavailable: 0   # Max unavailable pods while update (Zero pods - zero downtime)
+      maxSurge: 1 # Max extra pods limit while update (1 extra pod will create)
+      maxUnavailable: 0 # Max unavailable pods while update (Zero pods - zero downtime)
   selector:
     matchLabels:
       app: cicd-compass
@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
         - name: cicd-compass-container
-          image: sachinthokal/cicd-compass-app@sha256:17813ae8f18ab5851079e344758bc9aba4dfde358fa7fcfd11b45b1cc6dbf953
+          image: sachinthokal/cicd-compass-app@sha256:e2610af28c89c76ece23741067fd5c0a87d9d19acf9305fd7a594e0da20db21e
           ports:
             - containerPort: 8080
           envFrom:
