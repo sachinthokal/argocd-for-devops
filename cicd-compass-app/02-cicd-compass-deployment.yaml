@@ -18,20 +18,18 @@ spec:
     spec:
       containers:
         - name: cicd-compass-container
-          image: sachinthokal/cicd-compass-app@sha256:0ba0e9821db72152b67f562256d3f857c4c8e31bb10be2df84f99b6457960beb
+          image: sachinthokal/cicd-compass-app@sha256:17813ae8f18ab5851079e344758bc9aba4dfde358fa7fcfd11b45b1cc6dbf953
           ports:
             - containerPort: 8080
           envFrom:
             - configMapRef:
                 name: cicd-compass-configmap
-
           startupProbe:
             httpGet:
               path: /api/health
               port: 8080
             failureThreshold: 20
             periodSeconds: 10
-
           livenessProbe:
             httpGet:
               path: /api/health
@@ -40,7 +38,6 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 4
             failureThreshold: 3
-
           readinessProbe:
             httpGet:
               path: /api/ready
@@ -49,12 +46,10 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 4
             failureThreshold: 3
-          
           resources:
             requests:
               cpu: "250m"
               memory: "256Mi"
-
             limits:
               cpu: "750m"
               memory: "512Mi"
