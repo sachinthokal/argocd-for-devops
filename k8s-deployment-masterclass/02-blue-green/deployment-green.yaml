@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: blue-green-app
+  namespace: blue-green
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: blue-green-app
+  strategy:
+    blueGreen:
+      activeService: blue-green-active-service
+      previewService: blue-green-preview-service
+      trafficRouting:
+        nginx:
+          stableIngress: blue-green-ingress
+    
+      autoPromotionEnabled: false # Manual promote karayche aslyane false thevle ahe
+  template:
+    metadata:
+      labels:
+        app: blue-green-app
+    spec:
+      containers:
+      - name: web
+        image: hashicorp/http-echo:0.2.3
+        imagePullPolicy: IfNotPresent
+        args:
+        - "-text=Blue-Green Version v1"
+        ports:
+        - containerPort: 5678
