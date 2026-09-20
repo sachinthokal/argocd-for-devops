@@ -12,9 +12,9 @@ spec:
     blueGreen:
       activeService: blue-green-active-service
       previewService: blue-green-preview-service
-      # trafficRouting:
-      #   nginx:
-      #     stableIngress: master-unified-ingress
+    trafficRouting:
+      nginx:
+        stableIngress: master-unified-ingress
     
       autoPromotionEnabled: false # Manual promote karayche aslyane false thevle ahe
   template:
