@@ -24,9 +24,9 @@ spec:
     spec:
       containers:
       - name: web
-        image: hashicorp/http-echo:0.2.3
+        image: hashicorp/http-echo:1.0.0
         imagePullPolicy: IfNotPresent
         args:
-        - "-text=Blue-Green Version v1"
+        - "-text=Blue-Green Version v2"
         ports:
         - containerPort: 5678
