@@ -2,10 +2,10 @@ apiVersion: v1
 kind: Service
 metadata:
   name: app-stable-service
-  namespace: deployment-lab
+  namespace: canary
 spec:
   selector:
-    app: demo-app
+    app: canary-app
   ports:
     - protocol: TCP
       port: 80
@@ -15,10 +15,10 @@ apiVersion: v1
 kind: Service
 metadata:
   name: app-canary-service
-  namespace: deployment-lab
+  namespace: canary
 spec:
   selector:
-    app: demo-app
+    app: canary-app
   ports:
     - protocol: TCP
       port: 80
