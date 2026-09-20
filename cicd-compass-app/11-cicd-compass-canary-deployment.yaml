@@ -1,0 +1,68 @@
+kind: Rollout
+apiVersion: argoproj.io/v1alpha1
+metadata:
+  name: cicd-compass-rollout
+  namespace: compass
+  labels:
+    app: cicd-compass
+spec:
+  replicas: 3
+  strategy:
+    canary:
+      stableService: cicd-compass-stable-service
+      canaryService: cicd-compass-canary-service
+      steps:
+        - setWeight: 20   
+        - pause: {duration: 30s}  # 30 seconds thambun 20% var pause hoil
+        - setWeight: 50   
+        - pause: {}               # <--- ITHE BADAL: Duration neta fukt {} dila ki rollout ithech permanent thambel!
+  selector:
+    matchLabels:
+      app: cicd-compass
+  template:
+    metadata:
+      labels:
+        app: cicd-compass
+    spec:
+      containers:
+        - name: cicd-compass-container
+          image: sachinthokal/cicd-compass-app:v1.2.1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: APP_VERSION
+              value: "v1.2.1"                      # Ithe direct version tak (Canary sathi)
+            - name: APP_ENVIRONMENT
+              value: "production-green"
+            - name: APP_NAME
+              value: "cicd-compass-app-prod"
+          startupProbe:
+            httpGet:
+              path: /api/health
+              port: 8080
+            failureThreshold: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 4
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/ready
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 4
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "750m"
+              memory: "512Mi"

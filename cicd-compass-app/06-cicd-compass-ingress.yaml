@@ -13,6 +13,6 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: cicd-compass-service
+            name: cicd-compass-stable-service   # cicd-compass-service
             port:
               number: 80
