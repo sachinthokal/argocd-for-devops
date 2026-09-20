@@ -2,7 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: master-unified-ingress
-  namespace: canary
+  namespace: rolling
   annotations:
     kubernetes.io/ingress.class: "nginx"
 spec:
@@ -10,11 +10,11 @@ spec:
   - host: localhost
     http:
       paths:
-      # 1. Canary Strategy Path
-      - path: /canary
+      # 1. Rolling Update Strategy Path (Standard Deployment)
+      - path: /rolling
         pathType: Prefix
         backend:
           service:
-            name: app-stable-service
+            name: rolling-app-service
             port:
               number: 80
