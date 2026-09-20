@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cicd-compass-green-configmap
+  namespace: compass
+data:
+  APP_NAME: "cicd-compass-app-prod"
+  APP_ENVIRONMENT: "production-green"
+  APP_VERSION: "v1.2.1"
+  APP_REGION: "us-east-1"
+  APP_BUILDNUMBER: "sha-9a422a8"
