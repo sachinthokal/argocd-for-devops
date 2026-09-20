@@ -30,9 +30,9 @@ spec:
     spec:
       containers:
         - name: web
-          image: hashicorp/http-echo:1.0.0
+          image: hashicorp/http-echo:0.2.3
           imagePullPolicy: IfNotPresent
           args:
-            - "-text=Version: v1.0.0 (stable)"
+            - "-text=Version: v2.0.0 (canary)"
           ports:
             - containerPort: 5678
