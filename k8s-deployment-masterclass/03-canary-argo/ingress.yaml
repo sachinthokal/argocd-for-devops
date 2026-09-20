@@ -3,6 +3,8 @@ kind: Ingress
 metadata:
   name: canary-app-ingress
   namespace: canary
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
 spec:
   rules:
     - host: localhost
