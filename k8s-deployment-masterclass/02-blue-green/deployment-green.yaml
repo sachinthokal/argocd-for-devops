@@ -1,5 +1,5 @@
-apiVersion: argoproj.io/v1alpha1
-kind: Rollout
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: blue-green-app
   namespace: blue-green
@@ -12,11 +12,9 @@ spec:
     blueGreen:
       activeService: blue-green-active-service
       previewService: blue-green-preview-service
-    trafficRouting:
-      nginx:
-        stableIngress: master-unified-ingress
-    
-      autoPromotionEnabled: false # Manual promote karayche aslyane false thevle ahe
+      trafficRouting:
+        nginx:
+          stableIngress: master-unified-ingress
   template:
     metadata:
       labels:
