@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: deployment-lab
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: demo-app-rollout
+  namespace: deployment-lab
+spec:
+  replicas: 4
+  strategy:
+    canary:
+      stableService: app-stable-service
+      canaryService: app-canary-service
+      steps:
+        - setWeight: 25
+        - pause: {duration: 20s}
+        - setWeight: 50
+        - pause: {}  # 50% var permanent pause hoil, mhanje donhi version live distil!
+  selector:
+    matchLabels:
+      app: demo-app
+  template:
+    metadata:
+      labels:
+        app: demo-app
+    spec:
+      containers:
+        - name: web
+          image: hashicorp/http-echo:1.0.0
+          imagePullPolicy: IfNotPresent
+          args:
+            - "-text=Version: v1.0.0 (stable)"
+          ports:
+            - containerPort: 5678
