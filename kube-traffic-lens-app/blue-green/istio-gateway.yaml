@@ -11,4 +11,4 @@ spec:
       name: http
       protocol: HTTP
     hosts:
-    - "app.local"   # <--- इथे FQDN किंवा योग्य डोमेन नेम द्या
+    - "app.local"   # <--- FQDN OR DNS

@@ -6,8 +6,8 @@ spec:
   hosts:
   - "app.local"
   gateways:
-  - kube-traffic-lens-gateway   # <--- हे इथे जोडणे अत्यंत महत्त्वाचे आहे!
-  - mesh                        # (जर् मेशमधील अंतर्गत ट्रॅफिकसाठी हवा असेल तर)
+  - kube-traffic-lens-gateway   # <--- Gateway name
+  - mesh                        # <--- Mesh Gateway for internal traffic
   http:
   - route:
     - destination:

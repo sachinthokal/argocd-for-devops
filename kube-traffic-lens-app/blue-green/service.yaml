@@ -4,7 +4,7 @@ metadata:
   name: kube-traffic-lens-service
 spec:
   selector:
-    app: kube-traffic-lens
+    app: kube-traffic-lens   # Cover both v1 & v2 pods
   ports:
   - protocol: TCP
     port: 80
