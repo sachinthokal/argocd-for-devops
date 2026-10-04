@@ -15,12 +15,11 @@ spec:
     spec:
       containers:
         - name: app
-          image: sachinthokal/kube-traffic-lens-app@sha256:9ce63c3ee7a7e07161ff7beaee519a15e55a011a25c09b71a028e3389e8362d8
+          image: sachinthokal/kube-traffic-lens-app@v1.0.0
           ports:
             - containerPort: 8080
           env:
             - name: APP_VERSION
               value: "v1.0.0"
             - name: APP_ENVIRONMENT
-              value: "staging"
-env: []
+              value: "production"
