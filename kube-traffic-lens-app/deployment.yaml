@@ -21,4 +21,3 @@ spec:
           env:
             - name: APP_VERSION
               value: "v1.0.0"
-env: []
