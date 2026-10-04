@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: sachinthokal/kube-traffic-lens-app@v1.0.0
+          image: sachinthokal/kube-traffic-lens-app@sha256:e236b37db01d81529a3bb59da0693c10402bd36ab97fb6c69550516f724dfc35
           ports:
             - containerPort: 8080
           env:
